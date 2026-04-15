@@ -6,10 +6,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4  # Updated from v3
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v5  # Updated from v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
@@ -18,18 +18,50 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Create Mock Data and Model
+        run: |
+          # Create data folders
+          mkdir -p data/raw models
+          
+          # Create a dummy CSV so ingestion/processing logic doesn't fail
+          echo "disasterNumber,state,declarationDate" > data/raw/DisasterDeclarationsSummaries.csv
+          echo "1,NY,2024-01-01" >> data/raw/DisasterDeclarationsSummaries.csv
+          
+          # Create a tiny dummy model artifact for the API to load
+          python -c "
+          import joblib, pandas as pd, numpy as np
+          from sklearn.ensemble import RandomForestRegressor
+          from sklearn.pipeline import Pipeline
+          from sklearn.compose import ColumnTransformer
+          from sklearn.preprocessing import StandardScaler, OneHotEncoder
+
+          # Match the structure expected by your API/Trainer
+          num_features = ['declaration_year', 'region']
+          cat_features = ['incidentType', 'state', 'season']
+          
+          prep = ColumnTransformer([
+              ('num', StandardScaler(), num_features),
+              ('cat', OneHotEncoder(handle_unknown='ignore'), cat_features)
+          ])
+          
+          model = Pipeline([('prep', prep), ('model', RandomForestRegressor(n_estimators=1))])
+          
+          # Train on one row of fake data
+          X = pd.DataFrame([{'declaration_year': 2024, 'region': 2, 'incidentType': 'Flood', 'state': 'NY', 'season': 'Summer'}])
+          y = [15.0]
+          model.fit(X, y)
+          joblib.dump(model, 'models/best_model.pkl')
+          "
+
       - name: Start API and Run Tests
         env:
-          # This tells the API where to find its modules
           PYTHONPATH: ${{ github.workspace }}
         run: |
-          # 1. Start the FastAPI server in the background
-          # We use '&' to run it while the script continues
+          # Start the API in the background
           python -m uvicorn api.main:app --host 0.0.0.0 --port 8000 &
           
-          # 2. Wait for the server to "wake up"
-          # 10 seconds is usually enough for the environment to stabilize
+          # Wait for the model to load and server to start
           sleep 10
           
-          # 3. Run the tests
+          # Run the integration tests
           pytest tests/
