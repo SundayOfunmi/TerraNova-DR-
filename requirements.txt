@@ -1,0 +1,24 @@
+# Web & API
+fastapi
+uvicorn
+pydantic
+requests
+streamlit
+
+# Machine Learning & Processing
+pandas
+numpy
+scikit-learn
+xgboost
+joblib
+
+# Experiment Tracking & Explainability
+mlflow
+shap
+matplotlib
+seaborn
+
+# Testing
+pytest
+httpx
+

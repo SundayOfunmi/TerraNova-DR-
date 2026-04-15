@@ -1,0 +1,26 @@
+# Data and Models
+data/raw/
+data/processed/
+models/*.pkl
+models/*.png
+notebooks/*.pkl
+notebooks/*.png
+notebooks/*.csv
+
+# MLflow
+mlruns/
+mlflow.db
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.env
+
+# OS
+.DS_Store
+
+# ad hoc files
+Complete_script.py
+inspect_processed_data.py
+setup_project.sh

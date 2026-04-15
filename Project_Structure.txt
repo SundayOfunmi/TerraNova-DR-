@@ -1,0 +1,23 @@
+.
+├── api/
+│   ├── main.py             # FastAPI App
+│   └── schemas.py          # Pydantic Models
+├── dashboard/
+│   └── app.py              # Streamlit Interface
+├── data/
+│   ├── raw/                # CSVs from Task 1
+│   └── processed/          # CSV from Task 4
+├── docker/
+│   ├── Dockerfile.api
+│   └── Dockerfile.dashboard
+├── models/
+│   ├── best_model.pkl      # Saved Model Artifact
+│   └── shap_summary.png    # Explainer Plot
+├── src/
+│   ├── ingestion/          # Task 1
+│   ├── processing/         # Task 3 & 4
+│   ├── models/             # Task 6 & 8
+│   └── pipeline/           # Task 12
+├── docker-compose.yml      # Task 11
+└── requirements.txt
+
