@@ -5,13 +5,31 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout Code
+        uses: actions/checkout@v4  # Updated from v3
+
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5  # Updated from v4
         with:
           python-version: '3.11'
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-      - name: Run Tests
-        run: pytest tests/
 
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Start API and Run Tests
+        env:
+          # This tells the API where to find its modules
+          PYTHONPATH: ${{ github.workspace }}
+        run: |
+          # 1. Start the FastAPI server in the background
+          # We use '&' to run it while the script continues
+          python -m uvicorn api.main:app --host 0.0.0.0 --port 8000 &
+          
+          # 2. Wait for the server to "wake up"
+          # 10 seconds is usually enough for the environment to stabilize
+          sleep 10
+          
+          # 3. Run the tests
+          pytest tests/
